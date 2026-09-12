@@ -1,0 +1,30 @@
+workflows:
+  ogios-unsigned-ipa:
+    name: OGIOS Unsigned IPA
+    max_build_duration: 60
+    instance_type: mac_mini
+    environment:
+      xcode: latest
+    scripts:
+      - name: Build unsigned OGIOS.app
+        script: |
+          xcodebuild \
+            -project ThreeOneOSFive.xcodeproj \
+            -target OGIOS \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+      - name: Package unsigned IPA
+        script: |
+          set -e
+          APP_PATH="build/Build/Products/Release-iphoneos/OGIOS.app"
+          rm -rf Payload OGIOS-unsigned.ipa
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+          zip -qry OGIOS-unsigned.ipa Payload
+    artifacts:
+      - OGIOS-unsigned.ipa
